@@ -1,0 +1,131 @@
+{
+  "name": "BUG REPORT CLONE",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "2018eebd-ac86-4889-a0d3-801c3bc64c25",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "94efae9e-172c-4e89-904d-1af9a78e1982",
+      "name": "Webhook",
+      "webhookId": "2018eebd-ac86-4889-a0d3-801c3bc64c25"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $json;\nreturn [{\n  json: {\n    origin: data.origin,\n    severity: data.severity,\n    message: data.message,\n    user_id: data.context?.userId || null,\n    page: data.context?.page || null,\n    timestamp: data.context?.timestamp || new Date().toISOString()\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        180,
+        0
+      ],
+      "id": "9c956fac-4a5e-4522-b78a-ff61d558ad37",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=@everyone :rotating_light: Bug report recebido!",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        540,
+        0
+      ],
+      "id": "31671f8e-6b88-406b-b0cf-ffb7a4b6d0e4",
+      "name": "Discord",
+      "webhookId": "f42e9b7b-534c-4896-9962-adca6ed631d7",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "jYIvhlZCjfWwfCtz",
+          "name": "Discord Webhook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO notificacoes_bug (usuario_id, mensagem, origem, criado_em)\nVALUES (\n  NULLIF($1, 'null')::integer, \n  $2, \n  $3, \n  NOW()\n);",
+        "options": {
+          "queryReplacement": "=[\n  {{$json[\"user_id\"]}},\n  {{$json[\"page\"]}},\n  {{$json[\"timestamp\"]}}\n]"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        360,
+        0
+      ],
+      "id": "84f8f88d-6a22-4326-bc35-41d33c8e5346",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "ahbblShiE2jYy4wg",
+          "name": "Postgres account 3"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Discord": {
+      "main": [
+        []
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6ff2eded-e491-463e-b99e-69dd6b58fd6f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "415ffac7fbce729d38af90f802b40e260723cd2b47351fd0dcacf6f575d8999a"
+  },
+  "id": "hHDybpDtNzX90whh",
+  "tags": []
+}
